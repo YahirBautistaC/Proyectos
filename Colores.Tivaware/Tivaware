@@ -1,0 +1,221 @@
+#include <stdint.h>
+#include <stdbool.h>
+#include "inc/tm4c1294ncpdt.h"
+#include "driverlib/rom_map.h"
+#include "driverlib/sysctl.h"
+
+uint32_t ui32FrecuenciaRGB;
+
+#define DELAY_CYCLES 10000  // Ajusta este valor para controlar la velocidad del motor
+
+/**
+ * main.c
+*/
+
+int main(void)
+{
+    SYSCTL_RCGCGPIO_R |= 0x300;
+
+    while ((SYSCTL_PRGPIO_R & 0x300) != 0x300);
+
+    GPIO_PORTK_DIR_R |= 0x0F;  // Configurar pines como salidas
+    GPIO_PORTK_DEN_R |= 0x0F;  // Habilitar funciones digitales
+
+    GPIO_PORTK_DATA_R |= 0x01; // 20% F
+
+    while (1)
+    {
+        // Enciende bobina RED
+        GPIO_PORTK_DATA_R |= 0x00;
+        SysCtlDelay(DELAY_CYCLES);  // Introduce un retraso ajustable
+
+        // Enciende bobina BLUE
+        GPIO_PORTK_DATA_R |= 0x01;
+        SysCtlDelay(DELAY_CYCLES);
+
+        // Enciende bobina GREEN
+        GPIO_PORTK_DATA_R |= 0x03;
+        SysCtlDelay(DELAY_CYCLES);
+    }
+}
+
+#define DELAY_CYCLES 9000  // Ajusta este valor para controlar la velocidad del motor
+
+/**
+ * main.c
+*/
+
+int main(void)
+{
+    SYSCTL_RCGCGPIO_R |= 0x7;
+
+    while ((SYSCTL_PRGPIO_R & 0x7) != 0x7);
+
+    GPIO_PORTM_DIR_R |= 0xF0;  // Configurar pines como salidas
+    GPIO_PORTM_DEN_R |= 0xF0;  // Habilitar funciones digitales
+
+    while (1)
+    {
+        // Enciende bobina A
+        GPIO_PORTM_DATA_R |= 0x10;
+        SysCtlDelay(DELAY_CYCLES);  // Introduce un retraso ajustable
+
+        // Enciende bobina B
+        GPIO_PORTM_DATA_R |= 0x20;
+        SysCtlDelay(DELAY_CYCLES);
+
+        // Enciende bobina C
+        GPIO_PORTM_DATA_R |= 0x40;
+        SysCtlDelay(DELAY_CYCLES);
+
+        // Enciende bobina D
+        GPIO_PORTM_DATA_R |= 0x80;
+        SysCtlDelay(DELAY_CYCLES);
+    }
+}
+
+uint8_t d_uint8Dato;
+uint32_t ui32Loop;
+uint32_t ui32Distancia,ui32Distancia1;
+
+TRIGGER_04 (void)
+
+{
+     GPIO_PORTN_DATA_R |= 0B00010000;  // PONER A 1 PN4
+             SysCtlDelay(168);  // 48 MHz T=20 ns  20 x 3 = 61.4 nS  cuanto vale x para 10 uS con 60 nS RB
+        // retardo de 10 uS    x=10uS / 60 nS
+             GPIO_PORTN_DATA_R &= ~(0B00010000); // PONER A 0 PN4
+}
+
+PORTN_INI(void)
+
+{
+    SYSCTL_RCGCGPIO_R = SYSCTL_RCGCGPIO_R12;
+    ui32Loop = SYSCTL_RCGCGPIO_R;
+    GPIO_PORTN_DIR_R = 0x10; //PN4 SALIDA Y PN5 ENTRADA 0001 0000
+    GPIO_PORTN_DEN_R = 0x30;  //PN4 Y PN5 SEAN DIGITALES 0011 0000
+    GPIO_PORTN_DATA_R= 0x00;  // 0000 0000
+}
+
+TIMER_INI (void)
+
+{
+    SYSCTL_RCGCTIMER_R |= 0X08; //HABILITA TIMER 3   0000 1000
+    //retardo para que el reloj alcance el PORTN Y TIMER 3
+            ui32Loop = SYSCTL_RCGCTIMER_R;
+            TIMER3_CTL_R=0X00000000; //DESHABILITA TIMER EN LA CONFIGURACION
+            TIMER3_CFG_R= 0X00000000; //CONFIGURAR PARA 32 BITS
+            //TIMER3_TAMR_R= 0X00000002; //CONFIGURAR PARA MODO PERIODICO CUENTA HACIA ABAJO
+            TIMER3_TAMR_R= 0X00000012; //CONFIGURAR PARA MODO PERIODICO CUENTA HACIA ARRIBA
+            TIMER3_TAILR_R= 0X00FFFFFF; // VALOR DE RECARGA
+            TIMER3_TAPR_R= 0X00; // SOLO PARA MODOS DE 16 BITS
+            TIMER3_ICR_R= 0X00000001 ; //LIMPIA POSIBLE BANDERA PENDIENTE DE TIMER3
+            //TIMER3_IMR_R |= 0X00000000; //ACTIVA INTRRUPCION DE TIMEOUT
+           // NVIC_EN1_R= 1<<(35-32); //HABILITA LA INTERRUPCION DE  TIMER3
+           // TIMER3_CTL_R |= 0X00000001; //HABILITA TIMER EN LA CONFIGURACION
+}
+
+
+UART_INI(void)
+{
+SYSCTL_RCGCUART_R |=0X0001; //HABILITAR UART0  0000 0001
+SYSCTL_RCGCGPIO_R |=0X0001; //HABILITAR PUERTO A
+UART0_CTL_R &=~0X0001;  //DESHABILITAR UART
+UART0_IBRD_R = 27 ; //IBDR=int(50000000/16*115200))= int(27.1267)
+UART0_FBRD_R =8 ; //FBRD= round(0.1267*64 =8)
+UART0_LCRH_R =0X0070; //8 BITS, HABILITAR FIFO
+UART0_CTL_R= 0X0301 ; //HABILITAR RXE, TXE Y UART
+GPIO_PORTA_AHB_PCTL_R = (GPIO_PORTA_AHB_PCTL_R&0XFFFFFF00)+0X00000011; //UART
+GPIO_PORTA_AHB_AMSEL_R &= ~0X03; //DESHABILITAR FUNCION ANLOGICA EN PA0-1
+GPIO_PORTA_AHB_AFSEL_R |= 0X03; //HABILITAR FUNCION ALTERNA EN PA0-1
+GPIO_PORTA_AHB_DEN_R |= 0X03; //HABILITAR FUNCION I/O DIGITAL
+}
+
+//esperar hasta que se reciba un dato
+char UART_Lee_dato(void)
+{
+while((UART0_FR_R&0X0010)!=0); //ESPERAR A QUE RXFE SEA CERO
+d_uint8Dato=((char)(UART0_DR_R&0xff));
+//return((char)(UART0_DR_R&0xff));
+}
+
+char UART0_Escribe_dato(char dato)
+{
+while   ((UART0_FR_R&0X0020)!=0); // espera a que TXFF sea cero
+UART0_DR_R=dato;
+}
+int main(void) {
+    uint32_t g_ui32SysClock;
+    g_ui32SysClock = MAP_SysCtlClockFreqSet((SYSCTL_XTAL_25MHZ |
+                                                 SYSCTL_OSC_MAIN |
+                                                 SYSCTL_USE_PLL |
+                                                 SYSCTL_CFG_VCO_480), 50000000); //360 frecuencia
+ //
+
+    UART_INI();
+    PORTN_INI();
+    TIMER_INI();
+
+ while(1)
+ {
+    TRIGGER_04();
+
+    TIMER3_TAV_R=0x00;
+    while((GPIO_PORTN_DATA_R&0X20)==0);  // 0010 0000 ESPERAR A QUE PN5 SEA 1
+
+    TIMER3_CTL_R |= 0X00000001; //HABILITA TIMER EN LA CONFIGURACION CUANDO PN5 SEA 1
+    while((GPIO_PORTN_DATA_R&0X20)==0X20);
+    TIMER3_CTL_R &= ~(0X00000001);  //detener timer
+
+    ui32Distancia=TIMER3_TAV_R/(58*50);
+/*
+
+   ui32Distancia1=ui32Distancia;
+
+    ui32Distancia1=ui32Distancia1>>4;
+
+    if ( ui32Distancia1 <=9)
+        {ui32Distancia1=ui32Distancia1+0x30;}
+    else
+    {ui32Distancia1=ui32Distancia1+0x37;}
+
+
+    UART0_Escribe_dato(ui32Distancia1);
+
+
+    ui32Distancia1=ui32Distancia;
+
+    ui32Distancia1=ui32Distancia1&0x0f;
+
+
+    if ( ui32Distancia1<=9)
+            {ui32Distancia1=ui32Distancia1+0x30;}
+        else
+        {ui32Distancia1=ui32Distancia1+0x37;}
+
+    UART0_Escribe_dato(ui32Distancia1);
+
+
+
+
+    UART0_Escribe_dato(' ');
+    UART0_Escribe_dato('c');
+    UART0_Escribe_dato('m');
+
+    UART0_Escribe_dato(0x0d);
+    UART0_Escribe_dato(0x0a);
+*/
+
+    SysCtlDelay(1050000);   //xnS   0.000063 / 0.000000060
+    //retardo de 63 mS
+
+ }
+
+
+
+while (1)
+{
+    //UART_Lee_dato();
+    UART0_Escribe_dato(ui32Distancia);
+}
+}
