@@ -1,0 +1,10 @@
+C:\Users\Yahir\source\repos\Calentador_proyecto\Calentador_proyecto\bin\Debug\Calentador_proyecto.exe.config
+C:\Users\Yahir\source\repos\Calentador_proyecto\Calentador_proyecto\bin\Debug\Calentador_proyecto.exe
+C:\Users\Yahir\source\repos\Calentador_proyecto\Calentador_proyecto\bin\Debug\Calentador_proyecto.pdb
+C:\Users\Yahir\source\repos\Calentador_proyecto\Calentador_proyecto\obj\Debug\Calentador_proyecto.csproj.AssemblyReference.cache
+C:\Users\Yahir\source\repos\Calentador_proyecto\Calentador_proyecto\obj\Debug\Calentador_proyecto.Form1.resources
+C:\Users\Yahir\source\repos\Calentador_proyecto\Calentador_proyecto\obj\Debug\Calentador_proyecto.Properties.Resources.resources
+C:\Users\Yahir\source\repos\Calentador_proyecto\Calentador_proyecto\obj\Debug\Calentador_proyecto.csproj.GenerateResource.cache
+C:\Users\Yahir\source\repos\Calentador_proyecto\Calentador_proyecto\obj\Debug\Calentador_proyecto.csproj.CoreCompileInputs.cache
+C:\Users\Yahir\source\repos\Calentador_proyecto\Calentador_proyecto\obj\Debug\Calentador_proyecto.exe
+C:\Users\Yahir\source\repos\Calentador_proyecto\Calentador_proyecto\obj\Debug\Calentador_proyecto.pdb
